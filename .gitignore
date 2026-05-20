@@ -1,4 +1,7 @@
-IDE/*
-Programmer/*
-build/*
-squashfs-root/*
+vendor/IDE/
+vendor/Programmer/
+artifacts/build/
+artifacts/squashfs-root/
+artifacts/tools/
+artifacts/*.AppImage
+dist/*.tar.gz

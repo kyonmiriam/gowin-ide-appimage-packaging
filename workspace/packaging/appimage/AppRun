@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+export APPDIR="$HERE"
+
+DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+RUNTIME_ROOT="$DATA_HOME/gowin-ide-appimage"
+RUNTIME_USR="$RUNTIME_ROOT/usr"
+STAMP_FILE="$RUNTIME_ROOT/.appdir-stamp"
+LOCK_DIR="$RUNTIME_ROOT/.rebuild-lock"
+CURRENT_STAMP=$(sha256sum "$APPDIR/AppRun" "$APPDIR/usr/bin/gw_ide" "$APPDIR/Programmer/bin/programmer" | sha256sum | cut -d' ' -f1)
+
+mkdir -p "$RUNTIME_ROOT"
+
+if [[ "${1:-}" == "--install-programmer-udev-rules" ]]; then
+  exec "$APPDIR/usr/bin/install-programmer-udev-rules.sh"
+fi
+
+rebuild_runtime_bin() {
+  local existing_license=""
+
+  if [[ -f "$RUNTIME_USR/bin/gwlicense.ini" ]]; then
+    existing_license=$(mktemp)
+    cp -a "$RUNTIME_USR/bin/gwlicense.ini" "$existing_license"
+  fi
+
+  rm -rf "$RUNTIME_USR"
+  mkdir -p "$RUNTIME_USR"
+  cp -a "$APPDIR/usr/bin" "$RUNTIME_USR/"
+
+  ln -s "$APPDIR/usr/lib" "$RUNTIME_USR/lib"
+  ln -s "$APPDIR/usr/plugins" "$RUNTIME_USR/plugins"
+  ln -s "$APPDIR/usr/data" "$RUNTIME_USR/data"
+  ln -s "$APPDIR/usr/doc" "$RUNTIME_USR/doc"
+  ln -s "$APPDIR/usr/ipcore" "$RUNTIME_USR/ipcore"
+  ln -s "$APPDIR/usr/share" "$RUNTIME_USR/share"
+  ln -s "$APPDIR/usr/simlib" "$RUNTIME_USR/simlib"
+  rm -rf "$RUNTIME_ROOT/Programmer" "$RUNTIME_ROOT/Progmmer"
+  cp -a "$APPDIR/Programmer" "$RUNTIME_ROOT/"
+  ln -s "Programmer" "$RUNTIME_ROOT/Progmmer"
+
+  if [[ -n "$existing_license" ]]; then
+    cp -a "$existing_license" "$RUNTIME_USR/bin/gwlicense.ini"
+    rm -f "$existing_license"
+  fi
+
+  printf '%s\n' "$CURRENT_STAMP" > "$STAMP_FILE"
+}
+
+if [[ ! -f "$STAMP_FILE" ]] || [[ "$(<"$STAMP_FILE")" != "$CURRENT_STAMP" ]] || [[ ! -x "$RUNTIME_USR/bin/gw_ide" ]] || [[ "$(readlink "$RUNTIME_USR/lib" 2>/dev/null || true)" != "$APPDIR/usr/lib" ]] || [[ ! -e "$RUNTIME_USR/lib/libQt5Core.so.5" ]] || [[ -L "$RUNTIME_ROOT/Programmer" ]] || [[ ! -x "$RUNTIME_ROOT/Programmer/bin/programmer" ]] || [[ ! -x "$RUNTIME_ROOT/Programmer/bin/programmer.real" ]] || [[ ! -x "$RUNTIME_ROOT/Progmmer/bin/programmer" ]]; then
+  while ! mkdir "$LOCK_DIR" 2>/dev/null; do
+    sleep 0.1
+  done
+  trap 'rmdir "$LOCK_DIR" 2>/dev/null || true' EXIT
+  rebuild_runtime_bin
+  rmdir "$LOCK_DIR"
+  trap - EXIT
+fi
+
+export PATH="$RUNTIME_USR/bin:${PATH:-}"
+export LD_LIBRARY_PATH="$RUNTIME_USR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export QT_PLUGIN_PATH="$RUNTIME_USR/plugins/qt${QT_PLUGIN_PATH:+:$QT_PLUGIN_PATH}"
+export QT_QPA_PLATFORM_PLUGIN_PATH="$RUNTIME_USR/plugins/qt/platforms"
+export QML2_IMPORT_PATH="$RUNTIME_USR/plugins/qt/qml${QML2_IMPORT_PATH:+:$QML2_IMPORT_PATH}"
+export XDG_DATA_DIRS="$RUNTIME_USR/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+export QT_XCB_GL_INTEGRATION="${QT_XCB_GL_INTEGRATION:-xcb_glx}"
+export QT_OPENGL="${QT_OPENGL:-desktop}"
+export LIBGL_ALWAYS_SOFTWARE="${LIBGL_ALWAYS_SOFTWARE:-0}"
+export QTWEBENGINE_DISABLE_SANDBOX="${QTWEBENGINE_DISABLE_SANDBOX:-1}"
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+# Keep a few graphics/font libraries on the host to avoid ABI mismatches with
+# newer systems while still using the bundled application-specific stack.
+unset LD_PRELOAD
+export LD_PRELOAD="$RUNTIME_USR/lib/libgowin-qputenv-keep-xcbgl.so"
+
+exec "$RUNTIME_USR/bin/gw_ide" "$@"

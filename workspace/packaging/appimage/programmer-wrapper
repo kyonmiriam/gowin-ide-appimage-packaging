@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+export PATH="$HERE:${PATH:-}"
+export LD_LIBRARY_PATH="$HERE"
+export QT_PLUGIN_PATH="$HERE/PyQt5/qt-plugins"
+export QT_QPA_PLATFORM_PLUGIN_PATH="$HERE/PyQt5/qt-plugins/platforms"
+export QT_QPA_PLATFORMTHEME="generic"
+export FONTCONFIG_PATH="$HERE/fontconfig"
+export FONTCONFIG_FILE="$HERE/fontconfig/fonts.conf"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+unset LD_PRELOAD
+
+exec "$HERE/programmer.real" "$@"

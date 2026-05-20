@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Gowin IDE
+GenericName=FPGA IDE
+Comment=Gowin FPGA integrated development environment
+Exec=gw_ide
+Icon=gowin-ide
+Categories=Development;Electronics;
+Terminal=false
+StartupNotify=true

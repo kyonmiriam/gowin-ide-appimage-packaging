@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.gowinsemi.gowin_ide</id>
+  <name>Gowin IDE</name>
+  <summary>Gowin FPGA integrated development environment</summary>
+  <metadata_license>MIT</metadata_license>
+  <project_license>LicenseRef-proprietary</project_license>
+  <description>
+    <p>Portable AppImage wrapper for the vendor-provided Gowin IDE distribution for Gowin FPGA development workflows.</p>
+  </description>
+  <launchable type="desktop-id">gowin-ide.desktop</launchable>
+  <url type="homepage">https://www.gowinsemi.com/</url>
+</component>

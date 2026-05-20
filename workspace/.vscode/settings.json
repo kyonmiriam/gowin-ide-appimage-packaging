@@ -1,0 +1,23 @@
+{
+  "files.watcherExclude": {
+    "**/IDE/**": true,
+    "**/Programmer/**": true,
+    "**/build/**": true,
+    "**/squashfs-root/**": true,
+    "**/tools/**": true,
+    "**/*.AppImage": true,
+    "**/*.tar.gz": true
+  },
+  "search.exclude": {
+    "**/IDE/**": true,
+    "**/Programmer/**": true,
+    "**/build/**": true,
+    "**/squashfs-root/**": true,
+    "**/tools/**": true,
+    "**/*.AppImage": true,
+    "**/*.tar.gz": true
+  },
+  "files.exclude": {
+    "packaging": false
+  }
+}
