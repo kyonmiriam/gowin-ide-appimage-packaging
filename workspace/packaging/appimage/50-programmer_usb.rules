@@ -1,8 +1,12 @@
 ACTION=="add", ATTR{idVendor}=="33aa", ATTR{idProduct}=="0120", MODE:="666"
 
-# FTDI-based cables: set permissions only. Do not unbind ftdi_sio from udev
-# and do not run udevadm trigger/modprobe here; logs show those actions can
-# repeatedly reset the cable and leave libftdi stuck in ftdi_usb_reset.
-ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6014", MODE:="666"
+# FTDI-based cables: give user-space access and detach ftdi_sio when it binds.
+# Do not run udevadm trigger/modprobe here; logs show those actions repeatedly
+# reset the cable and can leave libftdi stuck in ftdi_usb_reset.
+ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="0403", ATTR{idProduct}=="6014", MODE:="666"
+ACTION=="bind", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_interface", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6014", ATTR{bInterfaceNumber}=="00", DRIVER=="ftdi_sio", RUN+="/bin/sh -c 'echo -n %k > /sys/bus/usb/drivers/ftdi_sio/unbind'"
+ACTION=="bind", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_interface", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6014", ATTR{bInterfaceNumber}=="01", DRIVER=="ftdi_sio", RUN+="/bin/sh -c 'echo -n %k > /sys/bus/usb/drivers/ftdi_sio/unbind'"
 
-ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6010", MODE:="666"
+ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="0403", ATTR{idProduct}=="6010", MODE:="666"
+ACTION=="bind", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_interface", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6010", ATTR{bInterfaceNumber}=="00", DRIVER=="ftdi_sio", RUN+="/bin/sh -c 'echo -n %k > /sys/bus/usb/drivers/ftdi_sio/unbind'"
+ACTION=="bind", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_interface", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6010", ATTR{bInterfaceNumber}=="01", DRIVER=="ftdi_sio", RUN+="/bin/sh -c 'echo -n %k > /sys/bus/usb/drivers/ftdi_sio/unbind'"
