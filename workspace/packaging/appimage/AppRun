@@ -14,7 +14,7 @@ STAMP_FILE="$RUNTIME_ROOT/.appdir-stamp"
 DEVICE_STAMP_FILE="$STATE_ROOT/share/.device-stamp"
 STATE_LOCK_DIR="$STATE_ROOT/.state-lock"
 LOCK_DIR="$RUNTIME_ROOT/.rebuild-lock"
-APP_STAMP=$(sha256sum "$APPDIR/AppRun" "$APPDIR/usr/bin/gw_ide" "$APPDIR/usr/bin/gw_sh" "$APPDIR/Programmer/bin/programmer" | sha256sum | cut -d' ' -f1)
+APP_STAMP=$(sha256sum "$APPDIR/AppRun" "$APPDIR/usr/bin/gw_ide" "$APPDIR/usr/bin/gw_sh" "$APPDIR/Programmer/bin/programmer" "$APPDIR/Programmer/bin/programmer_cli" | sha256sum | cut -d' ' -f1)
 DEVICE_STAMP=$(sha256sum "$APPDIR/usr/share/device/GW1NSR-4C/GW1NSR-4C.fse" | cut -d' ' -f1)
 CURRENT_STAMP=$(printf '%s\n%s\n' "$APP_STAMP" "$DEVICE_STAMP" | sha256sum | cut -d' ' -f1)
 export USER="${USER:-$(id -un)}"
@@ -32,7 +32,10 @@ ENTRYPOINT="gw_ide"
 if [[ "${1:-}" == "--gw_sh" || "${1:-}" == "gw_sh" ]]; then
   ENTRYPOINT="gw_sh"
   shift
-elif [[ "${1:-}" == "--programmer_cli" || "${1:-}" == "programmer_cli" ]]; then
+elif [[ "${1:-}" == "--programmer" || "${1:-}" == "programmer" ]]; then
+  ENTRYPOINT="programmer"
+  shift
+elif [[ "${1:-}" == "--programmer-cli" || "${1:-}" == "--programmer_cli" || "${1:-}" == "programmer_cli" ]]; then
   ENTRYPOINT="programmer_cli"
   shift
 fi
@@ -99,7 +102,7 @@ while ! mkdir "$LOCK_DIR" 2>/dev/null; do
 done
 trap 'rmdir "$LOCK_DIR" 2>/dev/null || true; rmdir "$STATE_LOCK_DIR" 2>/dev/null || true' EXIT
 
-if [[ ! -f "$STAMP_FILE" ]] || [[ "$(<"$STAMP_FILE")" != "$CURRENT_STAMP" ]] || [[ ! -x "$RUNTIME_USR/bin/gw_ide" ]] || [[ ! -x "$RUNTIME_USR/bin/gw_sh" ]] || [[ "$(readlink "$RUNTIME_USR/lib" 2>/dev/null || true)" != "$APPDIR/usr/lib" ]] || [[ ! -e "$RUNTIME_USR/lib/libQt5Core.so.5" ]] || [[ -L "$RUNTIME_USR/share" ]] || [[ "$(readlink "$RUNTIME_USR/share/device" 2>/dev/null || true)" != "$STATE_DEVICE" ]] || [[ ! -e "$RUNTIME_USR/share/device/GW1NSR-4C/GW1NSR-4C.fse" ]] || [[ -L "$RUNTIME_ROOT/Programmer" ]] || [[ ! -x "$RUNTIME_ROOT/Programmer/bin/programmer" ]] || [[ ! -x "$RUNTIME_ROOT/Programmer/bin/programmer.real" ]] || [[ ! -x "$RUNTIME_ROOT/Progmmer/bin/programmer" ]]; then
+if [[ ! -f "$STAMP_FILE" ]] || [[ "$(<"$STAMP_FILE")" != "$CURRENT_STAMP" ]] || [[ ! -x "$RUNTIME_USR/bin/gw_ide" ]] || [[ ! -x "$RUNTIME_USR/bin/gw_sh" ]] || [[ "$(readlink "$RUNTIME_USR/lib" 2>/dev/null || true)" != "$APPDIR/usr/lib" ]] || [[ ! -e "$RUNTIME_USR/lib/libQt5Core.so.5" ]] || [[ -L "$RUNTIME_USR/share" ]] || [[ "$(readlink "$RUNTIME_USR/share/device" 2>/dev/null || true)" != "$STATE_DEVICE" ]] || [[ ! -e "$RUNTIME_USR/share/device/GW1NSR-4C/GW1NSR-4C.fse" ]] || [[ -L "$RUNTIME_ROOT/Programmer" ]] || [[ ! -x "$RUNTIME_ROOT/Programmer/bin/programmer" ]] || [[ ! -x "$RUNTIME_ROOT/Programmer/bin/programmer.real" ]] || [[ ! -x "$RUNTIME_ROOT/Programmer/bin/programmer_cli" ]] || [[ ! -x "$RUNTIME_ROOT/Programmer/bin/programmer_cli.real" ]] || [[ ! -x "$RUNTIME_ROOT/Progmmer/bin/programmer" ]]; then
   rebuild_runtime_bin
 fi
 
@@ -179,8 +182,8 @@ unset LD_PRELOAD
 export LD_PRELOAD="$RUNTIME_USR/lib/libgowin-qputenv-keep-xcbgl.so"
 
 cd "$RUNTIME_USR/bin"
-if [[ "$ENTRYPOINT" == "programmer_cli" ]]; then
-  exec "$RUNTIME_ROOT/Programmer/bin/programmer" "${ARGS[@]}"
+if [[ "$ENTRYPOINT" == "programmer" || "$ENTRYPOINT" == "programmer_cli" ]]; then
+  exec "$RUNTIME_ROOT/Programmer/bin/$ENTRYPOINT" "${ARGS[@]}"
 fi
 
 exec "$RUNTIME_USR/bin/$ENTRYPOINT" "${ARGS[@]}"

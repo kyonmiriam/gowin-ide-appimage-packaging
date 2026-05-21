@@ -3,6 +3,7 @@
 set -euo pipefail
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+NAME=$(basename "$0")
 
 export PATH="$HERE:${PATH:-}"
 export LD_LIBRARY_PATH="$HERE"
@@ -16,4 +17,4 @@ export LANG="${LANG:-C.UTF-8}"
 export LC_ALL="${LC_ALL:-$LANG}"
 unset LD_PRELOAD
 
-exec "$HERE/programmer.real" "$@"
+exec "$HERE/$NAME.real" "$@"
