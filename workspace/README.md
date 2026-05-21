@@ -107,6 +107,32 @@ The generated AppImage supports:
 --install-programmer-udev-rules   Install Programmer USB udev rules
 ```
 
+## Verified Environment
+
+This packaging flow has been tested with:
+
+- Gowin Linux archive: `Gowin_V1.9.12.02_SP2_linux.tar.gz`
+- Generated AppImage name: `Gowin-IDE-1.9.12.02_SP2-x86_64.AppImage`
+- Gowin IDE bundled Qt: Qt 5.15.14
+- Gowin Programmer bundled Qt: Qt 5.5.1
+- AppImage architecture: x86_64
+- Desktop integration target: Linux desktop systems using X11/XCB
+
+Verified behavior:
+
+- Build from a user-provided Gowin tarball with `build-from-tarball.sh`.
+- Versioned AppImage output and compatibility symlink creation.
+- IDE launch through the AppImage runtime.
+- Gowin Tcl shell entrypoint with `--gw_sh` and `gw_sh`.
+- Programmer GUI entrypoint with `--programmer` and `programmer`.
+- Programmer CLI entrypoint with `--programmer-cli` and `programmer_cli`.
+- Bitstream generation with persistent `share/device` runtime data.
+- Optional icon handling from a user-provided icon file.
+- Optional opt-in Gowin website favicon fetch with `FETCH_GOWIN_ICON=1`.
+
+The build should also work with nearby Gowin Linux versions that keep the same
+archive layout, but those versions have not been verified in this repository.
+
 ## Notes
 
 - The AppImage stores writable runtime state under `~/.local/share/gowin-ide-appimage/`.
