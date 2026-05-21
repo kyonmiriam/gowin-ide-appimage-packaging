@@ -27,8 +27,8 @@ show_help() {
 Gowin IDE AppImage
 
 Usage:
-  Gowin-IDE-x86_64.AppImage [project.gprj]
-  Gowin-IDE-x86_64.AppImage <entrypoint> [args...]
+  Gowin-IDE-<version>-x86_64.AppImage [project.gprj]
+  Gowin-IDE-<version>-x86_64.AppImage <entrypoint> [args...]
 
 Entrypoints:
   --help                            Show this help and exit

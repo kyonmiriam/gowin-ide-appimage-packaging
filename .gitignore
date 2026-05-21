@@ -1,6 +1,8 @@
 vendor/IDE/
 vendor/Programmer/
+vendor/.gowin-version
 artifacts/build/
+artifacts/generated-icons/
 artifacts/squashfs-root/
 artifacts/tools/
 artifacts/*.AppImage
