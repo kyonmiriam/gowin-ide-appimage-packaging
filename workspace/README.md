@@ -113,3 +113,5 @@ The generated AppImage supports:
 - `share/device` is copied to persistent runtime state so bitstream generation does not depend on an already-unmounted AppImage FUSE path.
 - `Programmer` is copied to writable runtime state because it writes logs/cache beside its binaries.
 - The build scripts only package files extracted from the user-provided Gowin archive plus wrapper files from this repository.
+- Packaging status and implementation notes are in `workspace/docs/STATUS.md`.
+- The two tracked Qt `xcbglintegrations` plugins are documented in `workspace/packaging/appimage/xcbglintegrations/README.md`.
