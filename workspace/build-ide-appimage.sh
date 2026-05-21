@@ -25,6 +25,7 @@ mkdir -p \
   "$APPDIR/usr/lib" \
   "$APPDIR/usr/plugins" \
   "$APPDIR/usr/share/applications" \
+  "$APPDIR/usr/share/icons/hicolor/256x256/apps" \
   "$APPDIR/usr/share/icons/hicolor/scalable/apps" \
   "$APPDIR/usr/share/metainfo"
 
@@ -75,12 +76,14 @@ cp "$ROOT_DIR/packaging/appimage/AppRun" "$APPDIR/AppRun"
 cp "$ROOT_DIR/packaging/appimage/install-programmer-udev-rules.sh" "$APPDIR/usr/bin/"
 chmod +x "$APPDIR/usr/bin/install-programmer-udev-rules.sh"
 cp "$ROOT_DIR/packaging/appimage/gowin-ide.desktop" "$APPDIR/usr/share/applications/"
+cp "$ROOT_DIR/packaging/appimage/gowin-ide.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/"
 cp "$ROOT_DIR/packaging/appimage/gowin-ide.svg" "$APPDIR/usr/share/icons/hicolor/scalable/apps/"
 cp "$ROOT_DIR/packaging/appimage/io.github.gowinsemi.gowin_ide.appdata.xml" "$APPDIR/usr/share/metainfo/"
 cp "$ROOT_DIR/packaging/appimage/qt.conf" "$APPDIR/usr/bin/qt.conf"
 
 ln -sf usr/share/applications/gowin-ide.desktop "$APPDIR/gowin-ide.desktop"
-ln -sf usr/share/icons/hicolor/scalable/apps/gowin-ide.svg "$APPDIR/gowin-ide.svg"
+ln -sf usr/share/icons/hicolor/256x256/apps/gowin-ide.png "$APPDIR/gowin-ide.png"
+ln -sf gowin-ide.png "$APPDIR/.DirIcon"
 
 chmod +x "$APPDIR/AppRun"
 
