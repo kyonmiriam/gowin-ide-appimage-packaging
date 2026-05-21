@@ -37,6 +37,9 @@ rebuild_runtime_bin() {
   ln -s "$APPDIR/usr/ipcore" "$RUNTIME_USR/ipcore"
   ln -s "$APPDIR/usr/share" "$RUNTIME_USR/share"
   ln -s "$APPDIR/usr/simlib" "$RUNTIME_USR/simlib"
+  ln -s "$APPDIR/usr/translations" "$RUNTIME_USR/translations"
+  ln -sfn "$RUNTIME_USR/data" "$RUNTIME_ROOT/data"
+  ln -sfn "$RUNTIME_USR/translations" "$RUNTIME_ROOT/translations"
   rm -rf "$RUNTIME_ROOT/Programmer" "$RUNTIME_ROOT/Progmmer"
   cp -a "$APPDIR/Programmer" "$RUNTIME_ROOT/"
   ln -s "Programmer" "$RUNTIME_ROOT/Progmmer"
@@ -64,16 +67,70 @@ export LD_LIBRARY_PATH="$RUNTIME_USR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 export QT_PLUGIN_PATH="$RUNTIME_USR/plugins/qt${QT_PLUGIN_PATH:+:$QT_PLUGIN_PATH}"
 export QT_QPA_PLATFORM_PLUGIN_PATH="$RUNTIME_USR/plugins/qt/platforms"
 export QML2_IMPORT_PATH="$RUNTIME_USR/plugins/qt/qml${QML2_IMPORT_PATH:+:$QML2_IMPORT_PATH}"
-export XDG_DATA_DIRS="$RUNTIME_USR/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+export XDG_DATA_DIRS="$RUNTIME_USR/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
 export QT_XCB_GL_INTEGRATION="${QT_XCB_GL_INTEGRATION:-xcb_glx}"
 export QT_OPENGL="${QT_OPENGL:-desktop}"
 export LIBGL_ALWAYS_SOFTWARE="${LIBGL_ALWAYS_SOFTWARE:-0}"
 export QTWEBENGINE_DISABLE_SANDBOX="${QTWEBENGINE_DISABLE_SANDBOX:-1}"
+export QTWEBENGINEPROCESS_PATH="$RUNTIME_USR/bin/QtWebEngineProcess"
+export QTWEBENGINE_RESOURCES_PATH="$RUNTIME_USR/bin/resources"
+export QTWEBENGINE_LOCALES_PATH="$RUNTIME_USR/bin/translations"
+export GOWIN_ICUDTL_PATH="$RUNTIME_USR/bin/resources/icudtl.dat"
+CHROMIUM_FLAGS="--icu-data-file-path=$RUNTIME_USR/bin/resources/icudtl.dat --resources-dir-path=$RUNTIME_USR/bin/resources"
+export QTWEBENGINE_CHROMIUM_FLAGS="$CHROMIUM_FLAGS${QTWEBENGINE_CHROMIUM_FLAGS:+ $QTWEBENGINE_CHROMIUM_FLAGS}"
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+mkdir -p "$RUNTIME_ROOT/places"
+add_place() {
+  local name="$1"
+  local path="$2"
+
+  if [[ -e "$path" ]]; then
+    ln -sfn "$path" "$RUNTIME_ROOT/places/$name"
+  fi
+}
+
+add_place home-mnt "$HOME/mnt"
+add_place nextcloud "$HOME/mnt/nextcloud"
+add_place seadrive-root "$HOME/mnt/seadrive-root"
+add_place gvfs "/run/user/$(id -u)/gvfs"
+add_place gvfs-metadata "$HOME/.local/share/gvfs-metadata"
+add_place run-media "/run/media/$USER"
+add_place media /media
+add_place mnt /mnt
+
+ARGS=()
+for arg in "$@"; do
+  if [[ "$arg" != -* && -e "$arg" ]]; then
+    ARGS+=("$(realpath "$arg")")
+  else
+    ARGS+=("$arg")
+  fi
+done
+
+install_webengine_compat_links() {
+  local dir
+  local file
+
+  for dir in "$HOME/.IDE" "$HOME/.QtWebEngineProcess"; do
+    mkdir -p "$dir"
+    for file in icudtl.dat qtwebengine_resources.pak qtwebengine_resources_100p.pak qtwebengine_resources_200p.pak qtwebengine_devtools_resources.pak; do
+      if [[ -L "$dir/$file" || ! -e "$dir/$file" ]]; then
+        ln -sfn "$RUNTIME_USR/bin/resources/$file" "$dir/$file"
+      fi
+    done
+    if [[ -L "$dir/qtwebengine_locales" || ! -e "$dir/qtwebengine_locales" ]]; then
+      ln -sfn "$RUNTIME_USR/bin/translations/qtwebengine_locales" "$dir/qtwebengine_locales"
+    fi
+  done
+}
+
+install_webengine_compat_links
 
 # Keep a few graphics/font libraries on the host to avoid ABI mismatches with
 # newer systems while still using the bundled application-specific stack.
 unset LD_PRELOAD
 export LD_PRELOAD="$RUNTIME_USR/lib/libgowin-qputenv-keep-xcbgl.so"
 
-exec "$RUNTIME_USR/bin/gw_ide" "$@"
+cd "$RUNTIME_USR/bin"
+exec "$RUNTIME_USR/bin/gw_ide" "${ARGS[@]}"
