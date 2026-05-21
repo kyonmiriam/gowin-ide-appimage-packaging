@@ -1,0 +1,24 @@
+Gowin IDE AppImage Builder Notices
+
+This repository's original scripts, wrappers, metadata, and documentation are
+licensed under the MIT License. See LICENSE.
+
+This repository does not include Gowin IDE, Gowin Programmer, Gowin device
+databases, Gowin icons, Gowin logos, or other Gowin proprietary payload files.
+Users must obtain Gowin software separately and comply with Gowin's license
+terms.
+
+Gowin, Gowin IDE, Gowin Programmer, and related names, marks, and assets belong
+to their respective owners. This project is an unofficial packaging helper and
+is not affiliated with or endorsed by Gowin Semiconductor.
+
+The Qt xcbglintegrations binary plugins under
+workspace/packaging/appimage/xcbglintegrations/ are third-party Qt runtime
+components. They are not Gowin files and are not covered by this repository's
+MIT License. They are subject to Qt's applicable open-source or commercial
+license terms and any terms from the distribution package they were extracted
+from. See workspace/packaging/appimage/xcbglintegrations/README.md.
+
+Generated AppImages may contain user-provided Gowin files and third-party
+runtime components. Anyone redistributing generated AppImages is responsible
+for complying with all applicable Gowin, Qt, and third-party license terms.

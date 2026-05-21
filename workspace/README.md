@@ -115,3 +115,17 @@ The generated AppImage supports:
 - The build scripts only package files extracted from the user-provided Gowin archive plus wrapper files from this repository.
 - Packaging status and implementation notes are in `workspace/docs/STATUS.md`.
 - The two tracked Qt `xcbglintegrations` plugins are documented in `workspace/packaging/appimage/xcbglintegrations/README.md`.
+
+## License
+
+This repository's original scripts, wrappers, metadata, and documentation are
+licensed under the MIT License. See `LICENSE`.
+
+This repository does not include Gowin IDE, Gowin Programmer, Gowin device
+databases, Gowin icons, Gowin logos, or other Gowin proprietary payload files.
+Users must obtain Gowin software separately and comply with Gowin's license
+terms.
+
+The tracked Qt `xcbglintegrations` plugins are third-party Qt runtime
+components and are not covered by this repository's MIT License. See `NOTICE`
+and `workspace/packaging/appimage/xcbglintegrations/README.md`.
