@@ -39,6 +39,47 @@ open_file_manager() {
   fi
 }
 
+open_terminal() {
+  local workdir="${PWD:-$HOME}"
+  local arg
+
+  while [ "$#" -gt 0 ]; do
+    arg="$1"
+    shift
+    case "$arg" in
+      --working-directory=*)
+        workdir="${arg#--working-directory=}"
+        ;;
+      --default-working-directory=*)
+        workdir="${arg#--default-working-directory=}"
+        ;;
+      --workdir=*)
+        workdir="${arg#--workdir=}"
+        ;;
+      --working-directory|--default-working-directory|--workdir)
+        if [ "$#" -gt 0 ]; then
+          workdir="$1"
+          shift
+        fi
+        ;;
+      *)
+        if [ -d "$arg" ]; then
+          workdir="$arg"
+        fi
+        ;;
+    esac
+  done
+
+  if PATH="$host_path" command -v konsole >/dev/null 2>&1; then
+    run_host konsole --workdir "$workdir"
+  fi
+
+  if PATH="$host_path" command -v xterm >/dev/null 2>&1; then
+    cd "$workdir"
+    run_host xterm
+  fi
+}
+
 case "$name" in
   code|vscodium)
     run_host codium "$@"
@@ -48,6 +89,9 @@ case "$name" in
     ;;
   open-file-location)
     open_file_manager "$@"
+    ;;
+  gnome-terminal|kgx|xfce4-terminal|mate-terminal|lxterminal|terminator)
+    open_terminal "$@"
     ;;
 esac
 
