@@ -22,6 +22,33 @@ export LOGNAME="${LOGNAME:-$USER}"
 STATE_LICENSE="$STATE_ROOT/gwlicense.ini"
 STATE_DEVICE="$STATE_ROOT/share/device"
 
+show_help() {
+  cat <<'EOF'
+Gowin IDE AppImage
+
+Usage:
+  Gowin-IDE-x86_64.AppImage [project.gprj]
+  Gowin-IDE-x86_64.AppImage <entrypoint> [args...]
+
+Entrypoints:
+  --help                            Show this help and exit
+  --gw_sh, gw_sh                    Start Gowin Tcl shell
+  --programmer, programmer          Start Gowin Programmer GUI
+  --programmer-cli, programmer_cli  Start Gowin Programmer CLI
+  --install-programmer-udev-rules   Install Gowin Programmer USB udev rules
+
+Notes:
+  Project paths passed to the default IDE entrypoint are converted to absolute paths.
+  Programmer CLI arguments are passed through to Gowin programmer_cli.
+  The AppImage stores writable runtime data under ~/.local/share/gowin-ide-appimage/.
+EOF
+}
+
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  show_help
+  exit 0
+fi
+
 mkdir -p "$RUNTIME_ROOT" "$STATE_ROOT" "$STATE_ROOT/share"
 
 if [[ "${1:-}" == "--install-programmer-udev-rules" ]]; then
