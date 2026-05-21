@@ -10,12 +10,18 @@ RUNTIME_ROOT="$DATA_HOME/gowin-ide-appimage"
 RUNTIME_USR="$RUNTIME_ROOT/usr"
 STAMP_FILE="$RUNTIME_ROOT/.appdir-stamp"
 LOCK_DIR="$RUNTIME_ROOT/.rebuild-lock"
-CURRENT_STAMP=$(sha256sum "$APPDIR/AppRun" "$APPDIR/usr/bin/gw_ide" "$APPDIR/Programmer/bin/programmer" | sha256sum | cut -d' ' -f1)
+CURRENT_STAMP=$(sha256sum "$APPDIR/AppRun" "$APPDIR/usr/bin/gw_ide" "$APPDIR/usr/bin/gw_sh" "$APPDIR/Programmer/bin/programmer" | sha256sum | cut -d' ' -f1)
 
 mkdir -p "$RUNTIME_ROOT"
 
 if [[ "${1:-}" == "--install-programmer-udev-rules" ]]; then
   exec "$APPDIR/usr/bin/install-programmer-udev-rules.sh"
+fi
+
+ENTRYPOINT="gw_ide"
+if [[ "${1:-}" == "--gw-sh" || "${1:-}" == "gw_sh" ]]; then
+  ENTRYPOINT="gw_sh"
+  shift
 fi
 
 rebuild_runtime_bin() {
@@ -52,7 +58,7 @@ rebuild_runtime_bin() {
   printf '%s\n' "$CURRENT_STAMP" > "$STAMP_FILE"
 }
 
-if [[ ! -f "$STAMP_FILE" ]] || [[ "$(<"$STAMP_FILE")" != "$CURRENT_STAMP" ]] || [[ ! -x "$RUNTIME_USR/bin/gw_ide" ]] || [[ "$(readlink "$RUNTIME_USR/lib" 2>/dev/null || true)" != "$APPDIR/usr/lib" ]] || [[ ! -e "$RUNTIME_USR/lib/libQt5Core.so.5" ]] || [[ -L "$RUNTIME_ROOT/Programmer" ]] || [[ ! -x "$RUNTIME_ROOT/Programmer/bin/programmer" ]] || [[ ! -x "$RUNTIME_ROOT/Programmer/bin/programmer.real" ]] || [[ ! -x "$RUNTIME_ROOT/Progmmer/bin/programmer" ]]; then
+if [[ ! -f "$STAMP_FILE" ]] || [[ "$(<"$STAMP_FILE")" != "$CURRENT_STAMP" ]] || [[ ! -x "$RUNTIME_USR/bin/gw_ide" ]] || [[ ! -x "$RUNTIME_USR/bin/gw_sh" ]] || [[ "$(readlink "$RUNTIME_USR/lib" 2>/dev/null || true)" != "$APPDIR/usr/lib" ]] || [[ ! -e "$RUNTIME_USR/lib/libQt5Core.so.5" ]] || [[ -L "$RUNTIME_ROOT/Programmer" ]] || [[ ! -x "$RUNTIME_ROOT/Programmer/bin/programmer" ]] || [[ ! -x "$RUNTIME_ROOT/Programmer/bin/programmer.real" ]] || [[ ! -x "$RUNTIME_ROOT/Progmmer/bin/programmer" ]]; then
   while ! mkdir "$LOCK_DIR" 2>/dev/null; do
     sleep 0.1
   done
@@ -133,4 +139,4 @@ unset LD_PRELOAD
 export LD_PRELOAD="$RUNTIME_USR/lib/libgowin-qputenv-keep-xcbgl.so"
 
 cd "$RUNTIME_USR/bin"
-exec "$RUNTIME_USR/bin/gw_ide" "${ARGS[@]}"
+exec "$RUNTIME_USR/bin/$ENTRYPOINT" "${ARGS[@]}"
