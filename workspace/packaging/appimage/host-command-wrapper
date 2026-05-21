@@ -3,6 +3,7 @@
 set -euo pipefail
 
 name=$(basename "$0")
+host_path="/usr/local/bin:/usr/bin:/bin"
 
 unset APPDIR
 unset GOWIN_ICUDTL_PATH
@@ -16,19 +17,41 @@ unset QTWEBENGINE_CHROMIUM_FLAGS
 unset QTWEBENGINE_LOCALES_PATH
 unset QTWEBENGINE_RESOURCES_PATH
 
-export PATH="/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+export PATH="$host_path"
+
+run_host() {
+  local command_name="$1"
+  shift
+
+  local command_path
+  command_path=$(PATH="$host_path" command -v "$command_name" || true)
+  if [ -n "$command_path" ]; then
+    exec "$command_path" "$@"
+  fi
+}
+
+open_file_manager() {
+  if PATH="$host_path" command -v dolphin >/dev/null 2>&1; then
+    run_host dolphin "$@"
+  fi
+  if PATH="$host_path" command -v xdg-open >/dev/null 2>&1; then
+    run_host xdg-open "$@"
+  fi
+}
 
 case "$name" in
   code|vscodium)
-    if command -v codium >/dev/null 2>&1; then
-      exec codium "$@"
-    fi
+    run_host codium "$@"
+    ;;
+  nautilus|thunar)
+    open_file_manager "$@"
     ;;
   open-file-location)
-    if command -v xdg-open >/dev/null 2>&1; then
-      exec xdg-open "$@"
-    fi
+    open_file_manager "$@"
     ;;
 esac
 
-exec "$name" "$@"
+run_host "$name" "$@"
+
+printf '%s: host command not found: %s\n' "$0" "$name" >&2
+exit 127
