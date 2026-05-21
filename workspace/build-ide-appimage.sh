@@ -78,6 +78,11 @@ done
 cp "$ROOT_DIR/packaging/appimage/AppRun" "$APPDIR/AppRun"
 cp "$ROOT_DIR/packaging/appimage/install-programmer-udev-rules.sh" "$APPDIR/usr/bin/"
 chmod +x "$APPDIR/usr/bin/install-programmer-udev-rules.sh"
+cp "$ROOT_DIR/packaging/appimage/host-command-wrapper" "$APPDIR/usr/bin/host-command-wrapper"
+chmod +x "$APPDIR/usr/bin/host-command-wrapper"
+for cmd in xdg-open gio dolphin nautilus thunar kioclient kioclient5 codium vscodium code open-file-location; do
+  ln -sf host-command-wrapper "$APPDIR/usr/bin/$cmd"
+done
 cp "$ROOT_DIR/packaging/appimage/gowin-ide.desktop" "$APPDIR/usr/share/applications/"
 cp "$ROOT_DIR/packaging/appimage/gowin-ide.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/"
 cp "$ROOT_DIR/packaging/appimage/gowin-ide.ico" "$APPDIR/usr/share/icons/hicolor/256x256/apps/"

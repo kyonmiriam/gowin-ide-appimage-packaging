@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+name=$(basename "$0")
+
+unset APPDIR
+unset GOWIN_ICUDTL_PATH
+unset LD_LIBRARY_PATH
+unset LD_PRELOAD
+unset QML2_IMPORT_PATH
+unset QT_PLUGIN_PATH
+unset QT_QPA_PLATFORM_PLUGIN_PATH
+unset QTWEBENGINEPROCESS_PATH
+unset QTWEBENGINE_CHROMIUM_FLAGS
+unset QTWEBENGINE_LOCALES_PATH
+unset QTWEBENGINE_RESOURCES_PATH
+
+export PATH="/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+
+case "$name" in
+  code|vscodium)
+    if command -v codium >/dev/null 2>&1; then
+      exec codium "$@"
+    fi
+    ;;
+  open-file-location)
+    if command -v xdg-open >/dev/null 2>&1; then
+      exec xdg-open "$@"
+    fi
+    ;;
+esac
+
+exec "$name" "$@"
