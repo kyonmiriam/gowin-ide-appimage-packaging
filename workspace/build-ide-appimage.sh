@@ -80,12 +80,14 @@ cp "$ROOT_DIR/packaging/appimage/install-programmer-udev-rules.sh" "$APPDIR/usr/
 chmod +x "$APPDIR/usr/bin/install-programmer-udev-rules.sh"
 cp "$ROOT_DIR/packaging/appimage/gowin-ide.desktop" "$APPDIR/usr/share/applications/"
 cp "$ROOT_DIR/packaging/appimage/gowin-ide.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/"
+cp "$ROOT_DIR/packaging/appimage/gowin-ide.ico" "$APPDIR/usr/share/icons/hicolor/256x256/apps/"
 cp "$ROOT_DIR/packaging/appimage/gowin-ide.svg" "$APPDIR/usr/share/icons/hicolor/scalable/apps/"
 cp "$ROOT_DIR/packaging/appimage/io.github.gowinsemi.gowin_ide.appdata.xml" "$APPDIR/usr/share/metainfo/"
 cp "$ROOT_DIR/packaging/appimage/qt.conf" "$APPDIR/usr/bin/qt.conf"
 
 ln -sf usr/share/applications/gowin-ide.desktop "$APPDIR/gowin-ide.desktop"
 ln -sf usr/share/icons/hicolor/256x256/apps/gowin-ide.png "$APPDIR/gowin-ide.png"
+ln -sf usr/share/icons/hicolor/256x256/apps/gowin-ide.ico "$APPDIR/gowin-ide.ico"
 ln -sf gowin-ide.png "$APPDIR/.DirIcon"
 
 chmod +x "$APPDIR/AppRun"
