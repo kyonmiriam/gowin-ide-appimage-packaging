@@ -9,6 +9,20 @@ following files outside git and provide them locally when building:
 - Gowin Linux archive, for example `dist/Gowin_V1.9.12.02_SP2_linux.tar.gz`
 - Gowin icon file, if the Linux archive does not contain one discoverable by the build script
 
+## Why This Exists
+
+The official Gowin Linux IDE binary is built around a specific Ubuntu runtime
+environment. On other Linux distributions, and even on Ubuntu releases that do
+not match the expected runtime closely enough, users can run into many small but
+time-consuming issues: Qt plugin mismatches, QtWebEngine resource lookup
+failures, host library conflicts, writable runtime assumptions, and Programmer
+USB cable access problems.
+
+This packaging flow makes that setup reproducible by wrapping the user-provided
+Gowin IDE and Programmer files in a local AppImage with a controlled runtime
+layout, launcher entrypoints, compatibility fixes, and troubleshooting notes.
+Gowin proprietary payload files remain outside git.
+
 ## Dependencies
 
 ### openSUSE / zypper

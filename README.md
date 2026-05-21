@@ -8,6 +8,20 @@ databases, Gowin icons, Gowin logos, generated AppImages, or Gowin Linux
 archives. You must obtain the Gowin Linux archive separately and comply with
 Gowin's license terms.
 
+## Why This Exists
+
+The official Gowin Linux IDE binary is built around a specific Ubuntu runtime
+environment. On other Linux distributions, and even on Ubuntu releases that do
+not match the expected runtime closely enough, users can run into many small but
+time-consuming issues: Qt plugin mismatches, QtWebEngine resource lookup
+failures, host library conflicts, writable runtime assumptions, and Programmer
+USB cable access problems.
+
+This repository exists to make that setup reproducible. It packages the
+user-provided Gowin IDE and Programmer files into a local AppImage with wrapper
+scripts, runtime layout fixes, entrypoints, and troubleshooting notes, while
+keeping Gowin proprietary payload files outside git.
+
 ## What It Builds
 
 From a user-provided Gowin Linux archive, the scripts build a local AppImage
