@@ -49,6 +49,45 @@ Verified behavior includes IDE launch, Gowin Tcl shell, Programmer GUI,
 Programmer CLI, versioned AppImage output, and bitstream generation with
 persistent `share/device` runtime data.
 
+## Programmer Cable Troubleshooting
+
+If Programmer reports `Cable failed to open via the channel`, the usual cause is
+USB access rather than AppImage startup. On RHEL/Rocky Linux style systems,
+check whether the cable is owned by the kernel `ftdi_sio` driver or whether the
+udev rule did not grant user access:
+
+```bash
+lsusb
+lsusb -t
+ls -l /dev/bus/usb/BBB/DDD
+udevadm info -q property -n /dev/bus/usb/BBB/DDD
+```
+
+Replace `BBB/DDD` with the Bus/Device numbers from `lsusb`. If `lsusb -t` shows
+`Driver=ftdi_sio` for the cable interface, Gowin Programmer may fail to claim
+the interface until the driver is detached and the cable is reconnected.
+
+Install the packaged udev rule, reconnect the cable, then test the CLI before
+debugging the GUI:
+
+```bash
+./artifacts/Gowin-IDE-x86_64.AppImage --install-programmer-udev-rules
+./artifacts/Gowin-IDE-x86_64.AppImage --programmer-cli --scan-cables
+```
+
+As a permission check only, compare with `sudo`:
+
+```bash
+sudo ./artifacts/Gowin-IDE-x86_64.AppImage --programmer-cli --scan-cables
+```
+
+If `sudo` works but a normal user does not, the problem is udev permissions. If
+both fail while `ftdi_sio` is bound, the problem is likely kernel driver binding.
+
+For simple FPGA programming workflows, `openFPGALoader` may be a better option
+than Gowin Programmer. It integrates well with Linux distributions and often
+handles supported cables without the Gowin Programmer runtime.
+
 ## Documentation
 
 - Full build instructions: `workspace/README.md`
