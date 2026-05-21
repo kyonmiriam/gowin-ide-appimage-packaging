@@ -12,6 +12,8 @@ export QT_QPA_PLATFORMTHEME="generic"
 export FONTCONFIG_PATH="$HERE/fontconfig"
 export FONTCONFIG_FILE="$HERE/fontconfig/fonts.conf"
 export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+export LANG="${LANG:-C.UTF-8}"
+export LC_ALL="${LC_ALL:-$LANG}"
 unset LD_PRELOAD
 
 exec "$HERE/programmer.real" "$@"
