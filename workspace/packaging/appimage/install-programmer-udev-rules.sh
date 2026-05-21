@@ -23,10 +23,9 @@ if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
     set -e
     install -m 0644 "$1" /etc/udev/rules.d/50-programmer_usb.rules
     udevadm control --reload-rules
-    udevadm trigger
-    if lsmod | grep -q "^ftdi_sio\\b"; then
-      modprobe -r ftdi_sio usbserial 2>/dev/null || true
-    fi
+    udevadm trigger --attr-match=idVendor=33aa --attr-match=idProduct=0120 || true
+    udevadm trigger --attr-match=idVendor=0403 --attr-match=idProduct=6014 || true
+    udevadm trigger --attr-match=idVendor=0403 --attr-match=idProduct=6010 || true
     rm -f "$1"
     printf "Installed /etc/udev/rules.d/50-programmer_usb.rules\n"
     printf "Reconnect the Gowin USB cable before scanning in Programmer.\n"
@@ -35,11 +34,9 @@ fi
 
 install -m 0644 "$RULE_SRC" "$RULE_DST"
 udevadm control --reload-rules
-udevadm trigger
-
-if lsmod | grep -q '^ftdi_sio\b'; then
-  modprobe -r ftdi_sio usbserial 2>/dev/null || true
-fi
+udevadm trigger --attr-match=idVendor=33aa --attr-match=idProduct=0120 || true
+udevadm trigger --attr-match=idVendor=0403 --attr-match=idProduct=6014 || true
+udevadm trigger --attr-match=idVendor=0403 --attr-match=idProduct=6010 || true
 
 printf 'Installed %s\n' "$RULE_DST"
 printf 'Reconnect the Gowin USB cable before scanning in Programmer.\n'

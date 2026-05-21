@@ -1,0 +1,11 @@
+# Gowin USB Programmer permissions.
+ACTION=="add", ATTR{idVendor}=="33aa", ATTR{idProduct}=="0120", MODE:="666"
+
+# FTDI-based cables: let libusb access the device and detach ftdi_sio only from
+# the matching interfaces. Do not recursively run udevadm trigger here; it can
+# make every Programmer scan/burn wait for repeated udev processing.
+ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6014", MODE:="666", PROGRAM="/bin/sh -c 'echo -n $id:1.1 > /sys/bus/usb/drivers/ftdi_sio/unbind 2>/dev/null || true'"
+ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6014", MODE:="666", PROGRAM="/bin/sh -c 'echo -n $id:1.0 > /sys/bus/usb/drivers/ftdi_sio/unbind 2>/dev/null || true'"
+
+ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6010", MODE:="666", PROGRAM="/bin/sh -c 'echo -n $id:1.1 > /sys/bus/usb/drivers/ftdi_sio/unbind 2>/dev/null || true'"
+ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6010", MODE:="666", PROGRAM="/bin/sh -c 'echo -n $id:1.0 > /sys/bus/usb/drivers/ftdi_sio/unbind 2>/dev/null || true'"
