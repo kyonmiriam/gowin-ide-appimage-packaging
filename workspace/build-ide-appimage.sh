@@ -25,6 +25,11 @@ fi
 
 find_icon_file() {
   local generated_dir="$REPO_ROOT/artifacts/generated-icons"
+  local website_url="${GOWIN_ICON_URL:-https://www.gowinsemi.com.cn/}"
+  local html_file="$generated_dir/gowin-site.html"
+  local href
+  local favicon_url
+  local favicon_file
   local direct_icon
   local pe_file
   local extracted_ico
@@ -60,6 +65,40 @@ find_icon_file() {
       printf '%s\n' "$extracted_ico"
       return 0
     fi
+  fi
+
+  if [[ "${FETCH_GOWIN_ICON:-0}" == "1" ]]; then
+    if ! command -v curl >/dev/null 2>&1; then
+      printf 'FETCH_GOWIN_ICON=1 requires curl\n' >&2
+      return 1
+    fi
+    mkdir -p "$generated_dir"
+    if ! curl -fsSL "$website_url" -o "$html_file"; then
+      printf 'Failed to fetch Gowin website for icon: %s\n' "$website_url" >&2
+      return 1
+    fi
+    href=$(grep -Eio '<link[^>]+rel="[^"]*(icon|shortcut icon)[^"]*"[^>]*>' "$html_file" | grep -Eio 'href="[^"]+' | head -n1 | cut -d= -f2- | tr -d '"' || true)
+    if [[ -z "$href" ]]; then
+      href="/favicon.ico"
+    fi
+    case "$href" in
+      http://*|https://*) favicon_url="$href" ;;
+      //*) favicon_url="https:$href" ;;
+      /*) favicon_url="${website_url%/}$href" ;;
+      *) favicon_url="${website_url%/}/$href" ;;
+    esac
+    case "${favicon_url,,}" in
+      *.png) favicon_file="$generated_dir/gowin-site-icon.png" ;;
+      *.svg) favicon_file="$generated_dir/gowin-site-icon.svg" ;;
+      *.ico) favicon_file="$generated_dir/gowin-site-icon.ico" ;;
+      *) favicon_file="$generated_dir/gowin-site-icon.ico" ;;
+    esac
+    if curl -fsSL "$favicon_url" -o "$favicon_file" && [[ -s "$favicon_file" ]]; then
+      printf '%s\n' "$favicon_file"
+      return 0
+    fi
+    printf 'Failed to fetch Gowin website icon: %s\n' "$favicon_url" >&2
+    return 1
   fi
 }
 

@@ -14,20 +14,20 @@ following files outside git and provide them locally when building:
 ### openSUSE / zypper
 
 ```bash
-sudo zypper install bash tar gzip xz zstd gcc make sed grep findutils coreutils ImageMagick librsvg-tools icoutils desktop-file-utils appstream-glib
+sudo zypper install bash tar gzip xz zstd gcc make sed grep findutils coreutils curl ImageMagick librsvg-tools icoutils desktop-file-utils appstream-glib
 ```
 
 ### Debian / Ubuntu / apt
 
 ```bash
 sudo apt update
-sudo apt install bash tar gzip xz-utils zstd gcc make sed grep findutils coreutils imagemagick librsvg2-bin icoutils desktop-file-utils appstream
+sudo apt install bash tar gzip xz-utils zstd gcc make sed grep findutils coreutils curl imagemagick librsvg2-bin icoutils desktop-file-utils appstream
 ```
 
 ### Fedora / dnf
 
 ```bash
-sudo dnf install bash tar gzip xz zstd gcc make sed grep findutils coreutils ImageMagick librsvg2-tools icoutils desktop-file-utils libappstream-glib
+sudo dnf install bash tar gzip xz zstd gcc make sed grep findutils coreutils curl ImageMagick librsvg2-tools icoutils desktop-file-utils libappstream-glib
 ```
 
 You also need `appimagetool`. Put it at:
@@ -80,6 +80,20 @@ archive contains a Windows PE resource such as `gw_ide.exe`, the script also
 tries `wrestool` and `icotool` from `icoutils` to extract an ICO automatically.
 Converted/generated icon files are written under `artifacts/generated-icons/`,
 which is ignored by git.
+
+As an explicit opt-in fallback, the build can fetch the favicon advertised by
+the Gowin website. This downloads a Gowin-owned asset into ignored local build
+artifacts and does not add it to git:
+
+```bash
+FETCH_GOWIN_ICON=1 ./workspace/build-from-tarball.sh dist/Gowin_V1.9.12.02_SP2_linux.tar.gz
+```
+
+The default URL is `https://www.gowinsemi.com.cn/`. Override it if needed:
+
+```bash
+FETCH_GOWIN_ICON=1 GOWIN_ICON_URL=https://www.gowinsemi.com.cn/ ./workspace/build-from-tarball.sh dist/Gowin_V1.9.12.02_SP2_linux.tar.gz
+```
 
 ## Entrypoints
 
