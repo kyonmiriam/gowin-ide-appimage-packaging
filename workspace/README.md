@@ -7,7 +7,31 @@ The repository must not contain Gowin proprietary payload files. Keep the
 following files outside git and provide them locally when building:
 
 - Gowin Linux archive, for example `dist/Gowin_V1.9.12.02_SP2_linux.tar.gz`
-- Gowin icon file, if the Linux archive does not contain one discoverable by the build script
+- Gowin icon file, if the Linux archive does not contain one discoverable by
+  the build script
+
+## Build Summary
+
+Input:
+
+- `dist/Gowin_V1.9.12.02_SP2_linux.tar.gz`
+
+Command:
+
+```bash
+./workspace/build-from-tarball.sh dist/Gowin_V1.9.12.02_SP2_linux.tar.gz
+```
+
+Outputs:
+
+- `artifacts/Gowin-IDE-1.9.12.02_SP2-x86_64.AppImage`
+- `artifacts/Gowin-IDE-x86_64.AppImage`
+
+Local extracted vendor payload:
+
+- `vendor/IDE/`
+- `vendor/Programmer/`
+- `vendor/.gowin-version`
 
 ## Why This Exists
 
@@ -58,25 +82,10 @@ APPIMAGETOOL=/path/to/appimagetool-x86_64.AppImage ./workspace/build-from-tarbal
 
 ## Build
 
-Place the Gowin Linux archive under `dist/`, then run:
-
-```bash
-./workspace/build-from-tarball.sh dist/Gowin_V1.9.12.02_SP2_linux.tar.gz
-```
-
-The script extracts the archive to ignored local directories:
-
-```text
-vendor/IDE/
-vendor/Programmer/
-vendor/.gowin-version
-```
-
-Then it builds a versioned AppImage such as:
-
-```text
-artifacts/Gowin-IDE-1.9.12.02_SP2-x86_64.AppImage
-```
+Place the Gowin Linux archive under `dist/`, then run the build command shown
+above. The script extracts the vendor payload into ignored local directories and
+builds both a versioned AppImage and the compatibility symlink
+`artifacts/Gowin-IDE-x86_64.AppImage`.
 
 ## Icon Handling
 
@@ -134,15 +143,15 @@ This packaging flow has been tested with:
 
 Verified behavior:
 
-- Build from a user-provided Gowin tarball with `build-from-tarball.sh`.
-- Versioned AppImage output and compatibility symlink creation.
-- IDE launch through the AppImage runtime.
-- Gowin Tcl shell entrypoint with `--gw_sh` and `gw_sh`.
-- Programmer GUI entrypoint with `--programmer` and `programmer`.
-- Programmer CLI entrypoint with `--programmer-cli` and `programmer_cli`.
-- Bitstream generation with persistent `share/device` runtime data.
-- Optional icon handling from a user-provided icon file.
-- Optional opt-in Gowin website favicon fetch with `FETCH_GOWIN_ICON=1`.
+- Build from a user-provided Gowin tarball with `build-from-tarball.sh`
+- Versioned AppImage output and compatibility symlink creation
+- IDE launch through the AppImage runtime
+- Gowin Tcl shell entrypoint with `--gw_sh` and `gw_sh`
+- Programmer GUI entrypoint with `--programmer` and `programmer`
+- Programmer CLI entrypoint with `--programmer-cli` and `programmer_cli`
+- Bitstream generation with persistent `share/device` runtime data
+- Optional icon handling from a user-provided icon file
+- Optional opt-in Gowin website favicon fetch with `FETCH_GOWIN_ICON=1`
 
 The build should also work with nearby Gowin Linux versions that keep the same
 archive layout, but those versions have not been verified in this repository.
@@ -202,6 +211,7 @@ handles supported cables without the Gowin Programmer runtime.
 - The AppImage stores writable runtime state under `~/.local/share/gowin-ide-appimage/`.
 - `share/device` is copied to persistent runtime state so bitstream generation does not depend on an already-unmounted AppImage FUSE path.
 - `Programmer` is copied to writable runtime state because it writes logs/cache beside its binaries.
+- The runtime cache uses a content-based runtime ID and cleans up older cached runtimes.
 - The build scripts only package files extracted from the user-provided Gowin archive plus wrapper files from this repository.
 - Packaging status and implementation notes are in `workspace/docs/STATUS.md`.
 - The two tracked Qt `xcbglintegrations` plugins are documented in `workspace/packaging/appimage/xcbglintegrations/README.md`.

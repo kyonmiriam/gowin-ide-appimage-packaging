@@ -1,12 +1,21 @@
 # Gowin IDE AppImage Packaging
 
-Unofficial AppImage packaging scripts for Gowin IDE, Gowin Tcl shell, and
-Gowin Programmer on Linux.
+Unofficial AppImage packaging scripts for building a local Gowin IDE AppImage on
+Linux.
 
 This repository does not include Gowin IDE, Gowin Programmer, Gowin device
 databases, Gowin icons, Gowin logos, generated AppImages, or Gowin Linux
 archives. You must obtain the Gowin Linux archive separately and comply with
 Gowin's license terms.
+
+## At A Glance
+
+- Builds from a user-provided Gowin Linux archive.
+- Keeps Gowin proprietary payload files out of git.
+- Produces a local AppImage with entrypoints for IDE, `gw_sh`, Programmer GUI,
+  Programmer CLI, and a udev rule installer.
+- Includes runtime fixes for Qt/XCB, QtWebEngine, writable state, and
+  Programmer USB access on Linux systems.
 
 ## Why This Exists
 
@@ -21,17 +30,6 @@ This repository exists to make that setup reproducible. It packages the
 user-provided Gowin IDE and Programmer files into a local AppImage with wrapper
 scripts, runtime layout fixes, entrypoints, and troubleshooting notes, while
 keeping Gowin proprietary payload files outside git.
-
-## What It Builds
-
-From a user-provided Gowin Linux archive, the scripts build a local AppImage
-with entrypoints for:
-
-- Gowin IDE
-- Gowin Tcl shell: `--gw_sh` or `gw_sh`
-- Gowin Programmer GUI: `--programmer` or `programmer`
-- Gowin Programmer CLI: `--programmer-cli` or `programmer_cli`
-- Programmer USB udev rule installer: `--install-programmer-udev-rules`
 
 ## Quick Start
 
@@ -49,6 +47,14 @@ artifacts/Gowin-IDE-1.9.12.02_SP2-x86_64.AppImage
 
 The `dist/`, `vendor/`, and `artifacts/` directories are ignored by git.
 
+Primary AppImage entrypoints:
+
+- IDE: `./artifacts/Gowin-IDE-x86_64.AppImage`
+- Tcl shell: `--gw_sh` or `gw_sh`
+- Programmer GUI: `--programmer` or `programmer`
+- Programmer CLI: `--programmer-cli` or `programmer_cli`
+- USB rule installer: `--install-programmer-udev-rules`
+
 ## Verified Environment
 
 This packaging flow has been tested with:
@@ -59,9 +65,14 @@ This packaging flow has been tested with:
 - AppImage architecture: x86_64
 - Linux desktop systems using X11/XCB
 
-Verified behavior includes IDE launch, Gowin Tcl shell, Programmer GUI,
-Programmer CLI, versioned AppImage output, and bitstream generation with
-persistent `share/device` runtime data.
+Verified behavior includes:
+
+- versioned AppImage output from a user-provided Gowin tarball
+- IDE launch
+- Gowin Tcl shell launch with `--gw_sh`
+- Programmer GUI and Programmer CLI launch
+- persistent `share/device` runtime data for bitstream generation
+- stabilized writable runtime state under `~/.local/share/gowin-ide-appimage/`
 
 ## Programmer Cable Troubleshooting
 
@@ -104,8 +115,8 @@ handles supported cables without the Gowin Programmer runtime.
 
 ## Documentation
 
-- Full build instructions: `workspace/README.md`
-- Packaging status and implementation notes: `workspace/docs/STATUS.md`
+- Build and usage details: `workspace/README.md`
+- Packaging status: `workspace/docs/STATUS.md`
 - Qt plugin source/license notes: `workspace/packaging/appimage/xcbglintegrations/README.md`
 
 ## Repository Contents
