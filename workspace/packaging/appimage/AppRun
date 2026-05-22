@@ -7,20 +7,32 @@ export APPDIR="$HERE"
 
 DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 STATE_ROOT="$DATA_HOME/gowin-ide-appimage"
-RUNTIME_ID=$(printf '%s' "$APPDIR" | sha256sum | cut -c1-16)
+APP_STAMP=$(sha256sum "$APPDIR/AppRun" "$APPDIR/usr/bin/gw_ide" "$APPDIR/usr/bin/gw_sh" "$APPDIR/Programmer/bin/programmer" "$APPDIR/Programmer/bin/programmer_cli" | sha256sum | cut -d' ' -f1)
+DEVICE_STAMP=$(sha256sum "$APPDIR/usr/share/device/GW1NSR-4C/GW1NSR-4C.fse" | cut -d' ' -f1)
+CURRENT_STAMP=$(printf '%s\n%s\n' "$APP_STAMP" "$DEVICE_STAMP" | sha256sum | cut -d' ' -f1)
+RUNTIME_ID=$(printf '%s' "$CURRENT_STAMP" | cut -c1-16)
 RUNTIME_ROOT="$STATE_ROOT/runtimes/$RUNTIME_ID"
 RUNTIME_USR="$RUNTIME_ROOT/usr"
 STAMP_FILE="$RUNTIME_ROOT/.appdir-stamp"
 DEVICE_STAMP_FILE="$STATE_ROOT/share/.device-stamp"
 STATE_LOCK_DIR="$STATE_ROOT/.state-lock"
 LOCK_DIR="$RUNTIME_ROOT/.rebuild-lock"
-APP_STAMP=$(sha256sum "$APPDIR/AppRun" "$APPDIR/usr/bin/gw_ide" "$APPDIR/usr/bin/gw_sh" "$APPDIR/Programmer/bin/programmer" "$APPDIR/Programmer/bin/programmer_cli" | sha256sum | cut -d' ' -f1)
-DEVICE_STAMP=$(sha256sum "$APPDIR/usr/share/device/GW1NSR-4C/GW1NSR-4C.fse" | cut -d' ' -f1)
-CURRENT_STAMP=$(printf '%s\n%s\n' "$APP_STAMP" "$DEVICE_STAMP" | sha256sum | cut -d' ' -f1)
 export USER="${USER:-$(id -un)}"
 export LOGNAME="${LOGNAME:-$USER}"
 STATE_LICENSE="$STATE_ROOT/gwlicense.ini"
 STATE_DEVICE="$STATE_ROOT/share/device"
+
+cleanup_old_runtimes() {
+  local dir
+
+  mkdir -p "$STATE_ROOT/runtimes"
+  for dir in "$STATE_ROOT/runtimes"/*; do
+    [[ -d "$dir" ]] || continue
+    if [[ "$(basename "$dir")" != "$RUNTIME_ID" ]]; then
+      rm -rf "$dir"
+    fi
+  done
+}
 
 show_help() {
   cat <<'EOF'
@@ -49,6 +61,7 @@ if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
   exit 0
 fi
 
+cleanup_old_runtimes
 mkdir -p "$RUNTIME_ROOT" "$STATE_ROOT" "$STATE_ROOT/share"
 
 if [[ "${1:-}" == "--install-programmer-udev-rules" ]]; then
