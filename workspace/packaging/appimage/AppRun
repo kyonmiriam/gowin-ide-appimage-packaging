@@ -156,6 +156,12 @@ CHROMIUM_FLAGS="--icu-data-file-path=$RUNTIME_USR/bin/resources/icudtl.dat --res
 export QTWEBENGINE_CHROMIUM_FLAGS="$CHROMIUM_FLAGS${QTWEBENGINE_CHROMIUM_FLAGS:+ $QTWEBENGINE_CHROMIUM_FLAGS}"
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 
+# gw_sh still touches Qt on startup. In truly headless environments, force a
+# non-X11 platform to avoid xcb initialization failures after the Tcl banner.
+if [[ "$ENTRYPOINT" == "gw_sh" && -z "${DISPLAY:-}" && -z "${WAYLAND_DISPLAY:-}" ]]; then
+  export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-offscreen}"
+fi
+
 mkdir -p "$RUNTIME_ROOT/places"
 add_place() {
   local name="$1"

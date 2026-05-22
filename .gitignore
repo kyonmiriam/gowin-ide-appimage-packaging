@@ -7,3 +7,5 @@ artifacts/squashfs-root/
 artifacts/tools/
 artifacts/*.AppImage
 dist/*.tar.gz
+misc/*.fs
+local/
