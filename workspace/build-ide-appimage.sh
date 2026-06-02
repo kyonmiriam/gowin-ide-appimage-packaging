@@ -8,7 +8,13 @@ IDE_DIR="$REPO_ROOT/vendor/IDE"
 PROGRAMMER_DIR="$REPO_ROOT/vendor/Programmer"
 APPDIR="$REPO_ROOT/artifacts/build/GowinIDE.AppDir"
 APPIMAGE_TOOL_DEFAULT="$REPO_ROOT/artifacts/tools/appimagetool-x86_64.AppImage"
-APPIMAGE_TOOL="${APPIMAGETOOL:-$APPIMAGE_TOOL_DEFAULT}"
+if [[ -n "${APPIMAGETOOL:-}" ]]; then
+  APPIMAGE_TOOL="$APPIMAGETOOL"
+elif command -v appimagetool >/dev/null 2>&1; then
+  APPIMAGE_TOOL="$(command -v appimagetool)"
+else
+  APPIMAGE_TOOL="$APPIMAGE_TOOL_DEFAULT"
+fi
 VERSION_FILE="$REPO_ROOT/vendor/.gowin-version"
 VERSION="${GOWIN_VERSION:-}"
 if [[ -z "$VERSION" && -f "$VERSION_FILE" ]]; then
@@ -107,9 +113,16 @@ prepare_icon_files() {
   local generated_dir="$REPO_ROOT/artifacts/generated-icons"
   local png_out="$generated_dir/gowin-ide.png"
   local svg_out="$generated_dir/gowin-ide.svg"
+  local fetched_site_icon=0
 
   mkdir -p "$generated_dir"
   rm -f "$png_out" "$svg_out"
+
+  case "$icon_src" in
+    "$generated_dir"/gowin-site-icon.*)
+      fetched_site_icon=1
+      ;;
+  esac
 
   case "${icon_src,,}" in
     *.png)
@@ -158,7 +171,34 @@ prepare_icon_files() {
     return 1
   fi
 
+  # Only normalize the fetched website favicon. Do not alter user-provided
+  # icons or icons found in the vendor tree.
+  if [[ "$fetched_site_icon" == "1" ]]; then
+    if command -v magick >/dev/null 2>&1; then
+      local tmp_png="$generated_dir/gowin-ide.transparent.png"
+      if magick "$png_out" -alpha on -transparent white "$tmp_png"; then
+        mv "$tmp_png" "$png_out"
+      else
+        rm -f "$tmp_png"
+        printf 'Warning: failed to convert pure white pixels to transparency for website icon: %s\n' "$icon_src" >&2
+      fi
+    else
+      printf 'Warning: magick not available, keeping website icon white background: %s\n' "$icon_src" >&2
+    fi
+  fi
+
   printf '%s\n' "$generated_dir"
+}
+
+install_programmer_icon() {
+  local generated_dir="$REPO_ROOT/artifacts/generated-icons"
+  local local_programmer_icon="$REPO_ROOT/local/gowin-programmer-icon.png"
+  local programmer_png="$generated_dir/gowin-programmer.png"
+
+  rm -f "$programmer_png"
+  if [[ -f "$local_programmer_icon" ]]; then
+    cp "$local_programmer_icon" "$programmer_png"
+  fi
 }
 
 mkdir -p "$REPO_ROOT/artifacts/build" "$REPO_ROOT/artifacts/tools"
@@ -169,6 +209,7 @@ if [[ -z "$ICON_SRC" ]]; then
   exit 1
 fi
 ICON_DIR=$(prepare_icon_files "$ICON_SRC")
+install_programmer_icon
 
 mkdir -p \
   "$APPDIR/usr/bin" \
@@ -237,7 +278,11 @@ for cmd in xdg-open gio dolphin nautilus thunar kioclient kioclient5 codium vsco
   ln -sf host-command-wrapper "$APPDIR/usr/bin/$cmd"
 done
 cp "$ROOT_DIR/packaging/appimage/gowin-ide.desktop" "$APPDIR/usr/share/applications/"
+cp "$ROOT_DIR/packaging/appimage/gowin-programmer.desktop" "$APPDIR/usr/share/applications/"
 cp "$ICON_DIR/gowin-ide.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/"
+if [[ -f "$REPO_ROOT/artifacts/generated-icons/gowin-programmer.png" ]]; then
+  cp "$REPO_ROOT/artifacts/generated-icons/gowin-programmer.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/"
+fi
 if [[ -f "$ICON_DIR/gowin-ide.ico" ]]; then
   cp "$ICON_DIR/gowin-ide.ico" "$APPDIR/usr/share/icons/hicolor/256x256/apps/"
 fi
@@ -250,6 +295,9 @@ cp "$ROOT_DIR/packaging/appimage/qt.conf" "$APPDIR/usr/bin/qt.conf"
 ln -sf usr/share/applications/gowin-ide.desktop "$APPDIR/gowin-ide.desktop"
 ln -sf usr/share/icons/hicolor/256x256/apps/gowin-ide.png "$APPDIR/gowin-ide.png"
 ln -sf gowin-ide.png "$APPDIR/.DirIcon"
+if [[ -f "$APPDIR/usr/share/icons/hicolor/256x256/apps/gowin-programmer.png" ]]; then
+  ln -sf usr/share/icons/hicolor/256x256/apps/gowin-programmer.png "$APPDIR/gowin-programmer.png"
+fi
 if [[ -f "$APPDIR/usr/share/icons/hicolor/256x256/apps/gowin-ide.ico" ]]; then
   ln -sf usr/share/icons/hicolor/256x256/apps/gowin-ide.ico "$APPDIR/gowin-ide.ico"
 fi

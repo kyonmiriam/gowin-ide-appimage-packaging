@@ -23,14 +23,62 @@ STATE_LICENSE="$STATE_ROOT/gwlicense.ini"
 STATE_DEVICE="$STATE_ROOT/share/device"
 
 cleanup_old_runtimes() {
+  local keep_count="${GOWIN_RUNTIME_KEEP_COUNT:-5}"
+  local -a runtime_dirs=()
+  local -a removable=()
   local dir
+  local total
+  local remove_count
+
+  runtime_in_use() {
+    local runtime_dir="$1"
+
+    if command -v fuser >/dev/null 2>&1; then
+      if fuser -s "$runtime_dir" 2>/dev/null; then
+        return 0
+      fi
+    fi
+
+    if command -v lsof >/dev/null 2>&1; then
+      if lsof +D "$runtime_dir" >/dev/null 2>&1; then
+        return 0
+      fi
+    fi
+
+    return 1
+  }
 
   mkdir -p "$STATE_ROOT/runtimes"
   for dir in "$STATE_ROOT/runtimes"/*; do
     [[ -d "$dir" ]] || continue
-    if [[ "$(basename "$dir")" != "$RUNTIME_ID" ]]; then
-      rm -rf "$dir"
+    runtime_dirs+=("$dir")
+  done
+
+  if [[ ${#runtime_dirs[@]} -le $keep_count ]]; then
+    return 0
+  fi
+
+  mapfile -t runtime_dirs < <(printf '%s\n' "${runtime_dirs[@]}" | xargs -r stat -c '%Y %n' | sort -nr | cut -d' ' -f2-)
+
+  total=${#runtime_dirs[@]}
+  remove_count=$((total - keep_count))
+
+  for dir in "${runtime_dirs[@]}"; do
+    if [[ "$(basename "$dir")" == "$RUNTIME_ID" ]]; then
+      continue
     fi
+    removable+=("$dir")
+  done
+
+  for dir in "${removable[@]}"; do
+    if [[ $remove_count -le 0 ]]; then
+      break
+    fi
+    if runtime_in_use "$dir"; then
+      continue
+    fi
+    rm -rf "$dir"
+    remove_count=$((remove_count - 1))
   done
 }
 

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Gowin Programmer
+GenericName=FPGA Programmer
+Comment=Gowin FPGA Programmer GUI
+Exec=AppRun --programmer
+Icon=gowin-ide
+Categories=Development;Electronics;
+Terminal=false
+StartupNotify=true
