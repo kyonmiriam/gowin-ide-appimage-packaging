@@ -26,7 +26,11 @@ cleanup_old_runtimes() {
   local keep_count="${GOWIN_RUNTIME_KEEP_COUNT:-5}"
   local -a runtime_dirs=()
   local -a removable=()
+  local -a proc_links=("exe" "cwd" "root")
   local dir
+  local link
+  local pid_dir
+  local cmdline
   local total
   local remove_count
 
@@ -44,6 +48,23 @@ cleanup_old_runtimes() {
         return 0
       fi
     fi
+
+    for pid_dir in /proc/[0-9]*; do
+      [[ -d "$pid_dir" ]] || continue
+
+      for link in "${proc_links[@]}"; do
+        if [[ "$(readlink "$pid_dir/$link" 2>/dev/null || true)" == "$runtime_dir"* ]]; then
+          return 0
+        fi
+      done
+
+      if [[ -r "$pid_dir/cmdline" ]]; then
+        cmdline="$(tr '\0' '\n' < "$pid_dir/cmdline" 2>/dev/null || true)"
+        if [[ "$cmdline" == *"$runtime_dir"* ]]; then
+          return 0
+        fi
+      fi
+    done
 
     return 1
   }
